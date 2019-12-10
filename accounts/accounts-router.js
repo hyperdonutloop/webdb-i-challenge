@@ -7,6 +7,7 @@ const router = express.Router();
 router.get('/', (req, res) => {
   knex.select('*')
     .from('accounts')
+    .orderBy('name') // added in this as a stretch goal
     .then(accounts => {
       res.status(200).json(accounts)
     })
@@ -16,7 +17,21 @@ router.get('/', (req, res) => {
     })
 })
 
-router.post('/', (req, res) => {
+router.get('/:id', (req, res) => {
+  knex.select('*')
+    .from('accounts')
+    .where({ id: req.params.id })
+    .first()
+    .then (account => {
+      res.status(200).json(account)
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({ errorMessage: 'Error getting the specified account' })
+    })
+})
+
+router.post('/', validateAccount, (req, res) => {
   const accountData = req.body;
 
   knex('accounts')
@@ -70,7 +85,17 @@ router.delete('/:id', (req, res) => {
     })
 })
 
+// custom middleware to Validate whether or not there is a name and budget on POST request.
+// was not able to figure out how to add this in the POST, so added it here
 
+function validateAccount(req, res, next) {
+  const accountInfo = req.body;
+  if (!accountInfo.name || !accountInfo.budget) {
+    res.status(400).json({ errorMessage: 'Please provide name and budget for account' })
+  } else {
+    next();
+  }
+}
 
 
 module.exports = router;
