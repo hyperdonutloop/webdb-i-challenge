@@ -37,4 +37,40 @@ router.post('/', (req, res) => {
     })
 })
 
+router.put('/:id', (req, res) => {
+  const id = req.params.id;
+  const changes = req.body;
+
+  knex('accounts')
+    .where({ id })
+    .update(changes)
+    .then(count => {
+      if(count > 0) {
+        res.status(200).json({ message: `${count} record(s) updated 🎉` })
+      } else {
+        res.status(404).json({ message: 'Account not found! 🚫' })
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({ errorMessage: 'Error updating the account' })
+    });
+});
+
+router.delete('/:id', (req, res) => {
+  knex('accounts')
+    .where({ id: req.params.id })
+    .del()
+    .then(count => {
+      res.status(200).json({ message: `${count} record(s) removed 💀` })
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(200).json({ errorMessage: 'Error removing account' })
+    })
+})
+
+
+
+
 module.exports = router;
